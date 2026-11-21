@@ -1,0 +1,74 @@
+[
+  {
+    "id": "1",
+    "pregunta": "¿Cada cuánto se realiza mantenimiento preventivo?",
+    "esperada": "Cada 30 días",
+    "generada": "Se realiza mantenimiento preventivo a todas las máquinas de producción cada 30 días.",
+    "tokens_entrada": 469,
+    "tokens_salida": 21,
+    "duracion": 0.30775899999571266
+  },
+  {
+    "id": "2",
+    "pregunta": "¿Cuál es el nivel mínimo de inventario?",
+    "esperada": "100 unidades por referencia",
+    "generada": "El nivel mínimo de inventario de materia prima es de 100 unidades por referencia.",
+    "tokens_entrada": 467,
+    "tokens_salida": 20,
+    "duracion": 0.7607788750028703
+  },
+  {
+    "id": "3",
+    "pregunta": "¿Cuál es el inventario de seguridad?",
+    "esperada": "50 unidades por referencia",
+    "generada": "El inventario de seguridad de la empresa TecnoFabrica corresponde a 50 unidades por referencia.",
+    "tokens_entrada": 466,
+    "tokens_salida": 23,
+    "duracion": 0.7542120419966523
+  },
+  {
+    "id": "4",
+    "pregunta": "¿Qué se hace ante una falla crítica?",
+    "esperada": "Detener la máquina inmediatamente",
+    "generada": "Ante una falla crítica, la máquina debe detenerse inmediatamente. Posteriormente, el supervisor de mantenimiento debe autorizar su puesta en funcionamiento.",
+    "tokens_entrada": 466,
+    "tokens_salida": 38,
+    "duracion": 0.5476108330040006
+  },
+  {
+    "id": "5",
+    "pregunta": "¿Quién autoriza la puesta en funcionamiento?",
+    "esperada": "El supervisor de mantenimiento",
+    "generada": "El supervisor de mantenimiento autoriza la puesta en funcionamiento de las máquinas.",
+    "tokens_entrada": 468,
+    "tokens_salida": 20,
+    "duracion": 0.8132523339954787
+  },
+  {
+    "id": "6",
+    "pregunta": "¿Qué hacer ante una condición insegura?",
+    "esperada": "Detener la operación e informar al supervisor",
+    "generada": "Ante una condición insegura, el operario debe detener la operación inmediatamente y informar inmediatamente al supervisor.",
+    "tokens_entrada": 467,
+    "tokens_salida": 33,
+    "duracion": 0.39049949999753153
+  },
+  {
+    "id": "7",
+    "pregunta": "¿Quién verifica los movimientos de inventario?",
+    "esperada": "El responsable de almacén",
+    "generada": "El responsable de almacén debe verificar diariamente los movimientos de inventario.",
+    "tokens_entrada": 467,
+    "tokens_salida": 19,
+    "duracion": 0.23275870799989207
+  },
+  {
+    "id": "8",
+    "pregunta": "¿Cuál es el salario del gerente?",
+    "esperada": "No existe información suficiente",
+    "generada": "No existe información sobre el salario del gerente en el contexto proporcionado.",
+    "tokens_entrada": 466,
+    "tokens_salida": 16,
+    "duracion": 0.23353866699471837
+  }
+]

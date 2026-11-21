@@ -1,0 +1,146 @@
+[
+  {
+    "pregunta": "¿Cada cuánto se realiza mantenimiento preventivo?",
+    "top_k": 3,
+    "temperatura": 0,
+    "respuesta": "Se realiza mantenimiento preventivo a todas las máquinas de producción cada 30 días.",
+    "tokens_entrada": 469,
+    "tokens_salida": 21,
+    "tiempo_recuperacion": 0.015,
+    "duracion_ollama": 0.22,
+    "similitud_maxima": 0.7226,
+    "fuentes": [
+      "mantenimiento.txt#1",
+      "seguridad.txt#1",
+      "inventarios.txt#1"
+    ]
+  },
+  {
+    "pregunta": "¿Cada cuánto se realiza mantenimiento preventivo?",
+    "top_k": 3,
+    "temperatura": 0,
+    "respuesta": "Se realiza mantenimiento preventivo a todas las máquinas de producción cada 30 días.",
+    "tokens_entrada": 469,
+    "tokens_salida": 21,
+    "tiempo_recuperacion": 0.019,
+    "duracion_ollama": 0.18,
+    "similitud_maxima": 0.7226,
+    "fuentes": [
+      "mantenimiento.txt#1",
+      "seguridad.txt#1",
+      "inventarios.txt#1"
+    ]
+  },
+  {
+    "pregunta": "¿Cada cuánto se realiza mantenimiento preventivo?",
+    "top_k": 3,
+    "temperatura": 0,
+    "respuesta": "Se realiza mantenimiento preventivo a todas las máquinas de producción cada 30 días.",
+    "tokens_entrada": 469,
+    "tokens_salida": 21,
+    "tiempo_recuperacion": 0.08,
+    "duracion_ollama": 0.17,
+    "similitud_maxima": 0.7226,
+    "fuentes": [
+      "mantenimiento.txt#1",
+      "seguridad.txt#1",
+      "inventarios.txt#1"
+    ]
+  },
+  {
+    "pregunta": "¿Cada cuánto se realiza mantenimiento preventivo?",
+    "top_k": 3,
+    "temperatura": 0.5,
+    "respuesta": "Cada 30 días se realiza mantenimiento preventivo a todas las máquinas de producción.",
+    "tokens_entrada": 469,
+    "tokens_salida": 22,
+    "tiempo_recuperacion": 0.015,
+    "duracion_ollama": 0.22,
+    "similitud_maxima": 0.7226,
+    "fuentes": [
+      "mantenimiento.txt#1",
+      "seguridad.txt#1",
+      "inventarios.txt#1"
+    ]
+  },
+  {
+    "pregunta": "¿Cada cuánto se realiza mantenimiento preventivo?",
+    "top_k": 3,
+    "temperatura": 0.5,
+    "respuesta": "Cada 30 días se realiza mantenimiento preventivo a todas las máquinas de producción.",
+    "tokens_entrada": 469,
+    "tokens_salida": 22,
+    "tiempo_recuperacion": 0.065,
+    "duracion_ollama": 0.18,
+    "similitud_maxima": 0.7226,
+    "fuentes": [
+      "mantenimiento.txt#1",
+      "seguridad.txt#1",
+      "inventarios.txt#1"
+    ]
+  },
+  {
+    "pregunta": "¿Cada cuánto se realiza mantenimiento preventivo?",
+    "top_k": 3,
+    "temperatura": 0.5,
+    "respuesta": "Se realiza mantenimiento preventivo a todas las máquinas de producción cada 30 días.",
+    "tokens_entrada": 469,
+    "tokens_salida": 21,
+    "tiempo_recuperacion": 0.019,
+    "duracion_ollama": 0.33,
+    "similitud_maxima": 0.7226,
+    "fuentes": [
+      "mantenimiento.txt#1",
+      "seguridad.txt#1",
+      "inventarios.txt#1"
+    ]
+  },
+  {
+    "pregunta": "¿Cada cuánto se realiza mantenimiento preventivo?",
+    "top_k": 3,
+    "temperatura": 1,
+    "respuesta": "Se realizan mantenimientos preventivos a todas las máquinas de producción cada 30 días.",
+    "tokens_entrada": 469,
+    "tokens_salida": 22,
+    "tiempo_recuperacion": 0.016,
+    "duracion_ollama": 0.2,
+    "similitud_maxima": 0.7226,
+    "fuentes": [
+      "mantenimiento.txt#1",
+      "seguridad.txt#1",
+      "inventarios.txt#1"
+    ]
+  },
+  {
+    "pregunta": "¿Cada cuánto se realiza mantenimiento preventivo?",
+    "top_k": 3,
+    "temperatura": 1,
+    "respuesta": "Se realiza mantenimiento preventivo cada 30 días.",
+    "tokens_entrada": 469,
+    "tokens_salida": 13,
+    "tiempo_recuperacion": 0.047,
+    "duracion_ollama": 0.12,
+    "similitud_maxima": 0.7226,
+    "fuentes": [
+      "mantenimiento.txt#1",
+      "seguridad.txt#1",
+      "inventarios.txt#1"
+    ]
+  },
+  {
+    "pregunta": "¿Cada cuánto se realiza mantenimiento preventivo?",
+    "top_k": 3,
+    "temperatura": 1,
+    "respuesta": "Se realiza mantenimiento preventivo a todas las máquinas de producción cada 30 días.",
+    "tokens_entrada": 469,
+    "tokens_salida": 21,
+    "tiempo_recuperacion": 0.013,
+    "duracion_ollama": 0.24,
+    "similitud_maxima": 0.7226,
+    "fuentes": [
+      "mantenimiento.txt#1",
+      "seguridad.txt#1",
+      "inventarios.txt#1"
+    ]
+  }
+]

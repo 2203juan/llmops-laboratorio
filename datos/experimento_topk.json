@@ -1,0 +1,48 @@
+[
+  {
+    "pregunta": "¿Qué debe hacer un operario si encuentra una condición insegura?",
+    "top_k": 1,
+    "temperatura": 0.2,
+    "respuesta": "Un operario debe detener la operación inmediatamente y informar inmediatamente al supervisor si encuentra una condición insegura en una máquina.",
+    "tokens_entrada": 220,
+    "tokens_salida": 35,
+    "tiempo_recuperacion": 0.047,
+    "duracion_ollama": 0.34,
+    "similitud_maxima": 0.6543,
+    "fuentes": [
+      "seguridad.txt#1"
+    ]
+  },
+  {
+    "pregunta": "¿Qué debe hacer un operario si encuentra una condición insegura?",
+    "top_k": 3,
+    "temperatura": 0.2,
+    "respuesta": "Un operario debe detener la operación e informar inmediatamente al supervisor si encuentra una condición insegura en una máquina.",
+    "tokens_entrada": 472,
+    "tokens_salida": 31,
+    "tiempo_recuperacion": 0.018,
+    "duracion_ollama": 0.78,
+    "similitud_maxima": 0.6543,
+    "fuentes": [
+      "seguridad.txt#1",
+      "inventarios.txt#1",
+      "mantenimiento.txt#1"
+    ]
+  },
+  {
+    "pregunta": "¿Qué debe hacer un operario si encuentra una condición insegura?",
+    "top_k": 5,
+    "temperatura": 0.2,
+    "respuesta": "Un operario debe detener la operación inmediatamente y informar al supervisor inmediatamente de la condición insegura que ha identificado.",
+    "tokens_entrada": 472,
+    "tokens_salida": 35,
+    "tiempo_recuperacion": 0.044,
+    "duracion_ollama": 0.34,
+    "similitud_maxima": 0.6543,
+    "fuentes": [
+      "seguridad.txt#1",
+      "inventarios.txt#1",
+      "mantenimiento.txt#1"
+    ]
+  }
+]

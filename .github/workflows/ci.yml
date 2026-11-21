@@ -1,0 +1,33 @@
+name: CI - Laboratorio LLMOps
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Validar docker-compose
+        run: |
+          cp .env.example .env
+          docker compose config -q
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependencias de la API
+        run: pip install -r app/requirements.txt
+
+      - name: Compilar código
+        run: python -m compileall -q app
+
+      - name: Tests del RAG
+        run: python -m pytest -q -p no:cacheprovider app/tests

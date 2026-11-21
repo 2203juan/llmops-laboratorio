@@ -1,0 +1,50 @@
+[
+  {
+    "pregunta": "¿Cuál es el salario del gerente?",
+    "top_k": 3,
+    "temperatura": 0.2,
+    "respuesta": "No existe información sobre el salario del gerente en el contexto proporcionado.",
+    "tokens_entrada": 466,
+    "tokens_salida": 16,
+    "tiempo_recuperacion": 0.018,
+    "duracion_ollama": 0.17,
+    "similitud_maxima": 0.4995,
+    "fuentes": [
+      "mantenimiento.txt#1",
+      "seguridad.txt#1",
+      "inventarios.txt#1"
+    ]
+  },
+  {
+    "pregunta": "¿Cuál fue la facturación de TecnoFábrica el año pasado?",
+    "top_k": 3,
+    "temperatura": 0.2,
+    "respuesta": "No existe información en el contexto proporcionado sobre la facturación de TecnoFábrica para el año pasado.",
+    "tokens_entrada": 475,
+    "tokens_salida": 26,
+    "tiempo_recuperacion": 0.018,
+    "duracion_ollama": 0.31,
+    "similitud_maxima": 0.6477,
+    "fuentes": [
+      "seguridad.txt#1",
+      "inventarios.txt#1",
+      "mantenimiento.txt#1"
+    ]
+  },
+  {
+    "pregunta": "¿Cuántos empleados tiene TecnoFábrica?",
+    "top_k": 3,
+    "temperatura": 0.2,
+    "respuesta": "No existe información en el contexto proporcionado sobre el número de empleados de TecnoFábrica.",
+    "tokens_entrada": 470,
+    "tokens_salida": 23,
+    "tiempo_recuperacion": 0.087,
+    "duracion_ollama": 0.23,
+    "similitud_maxima": 0.6626,
+    "fuentes": [
+      "inventarios.txt#1",
+      "seguridad.txt#1",
+      "mantenimiento.txt#1"
+    ]
+  }
+]
