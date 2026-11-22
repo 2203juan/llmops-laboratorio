@@ -31,9 +31,8 @@ fuentes. La primera fuente es la política de mantenimiento (similitud 0.603).
 
 ### Trazas en MLflow
 
-Cada consulta queda registrada en el experimento `Laboratorio_RAG_Ollama` con su entrada y
-su salida. Las 78 trazas incluyen consultas posteriores a la evaluación de la sección
-[Resultados](#resultados).
+Lista del experimento `Laboratorio_RAG_Ollama`. Tiene 78 trazas, más que las 24 de
+[Resultados](#resultados), porque hubo más consultas después de la evaluación.
 
 ![Trazas en MLflow](docs/img/mlflow.png)
 
@@ -111,8 +110,8 @@ logs/                          pipeline.log
 mlflow/ prometheus/ grafana/   servicios de observabilidad
 ```
 
-La evaluación va aparte del pipeline: las preguntas de referencia no son base de
-conocimiento y no deben entrar al índice.
+La evaluación va aparte del pipeline para que las preguntas de referencia no entren al
+índice.
 
 ## Uso
 
@@ -149,8 +148,8 @@ historial se ve en pantalla, pero no se envía al modelo.
 ## Resultados
 
 Todos los datos de esta sección salen de `evaluacion/resultados/`.
-Ollama corre en CPU dentro de Docker (`ollama ps` muestra `100% CPU`); con el modelo ya
-cargado, cada respuesta tarda menos de un segundo.
+Ollama corre en CPU dentro de Docker (`ollama ps` muestra `100% CPU`). Con el modelo ya
+cargado, las respuestas de la evaluación tardaron entre 0,2 y 0,8 s.
 
 ### Evaluación con preguntas de referencia
 
@@ -180,10 +179,8 @@ Pregunta: *¿Qué debe hacer un operario si encuentra una condición insegura?*
 | Respuesta correcta | Sí | Sí | Sí |
 
 Con K = 1 la respuesta es igual de correcta y usa menos de la mitad de los tokens de
-entrada. K = 3 y K = 5 dan lo mismo porque el índice solo tiene **3 fragmentos**: cada
+entrada. K = 3 y K = 5 recuperan lo mismo porque el índice solo tiene **3 fragmentos**: cada
 documento mide menos de 500 caracteres, el tamaño de fragmento, así que no se divide.
-Con estos documentos, pasar de K = 1 a K = 3 duplica los tokens de entrada (220 → 472)
-sin cambiar la respuesta.
 
 ### Experimento B: temperatura
 
@@ -240,8 +237,8 @@ embeddings simulados, así que no necesitan Ollama. El CI de GitHub Actions vali
   en mi equipo estaban ocupados por otros proyectos, por AirPlay (5000) y por Ollama
   nativo (11434). Se cambian en `.env`; `--allowed-hosts` de MLflow usa el mismo puerto.
 - **Pipeline medallion.** El tutorial lee los TXT y escribe `datos/indice.json` en una sola
-  función; aquí son etapas separadas y la API consulta SQLite. El cambio no altera los
-  resultados: los 3 fragmentos y sus embeddings son idénticos a los del índice anterior.
+  función; aquí son etapas separadas y la API consulta SQLite. Los 3 fragmentos y
+  sus embeddings coinciden con los del índice anterior.
 - **Dashboard de Grafana precargado** con los seis paneles del paso 27, en
   `grafana/provisioning/dashboards/`.
 - **`evaluacion/experimentos.py`** ejecuta los experimentos A, B y C del paso 30 y guarda los
