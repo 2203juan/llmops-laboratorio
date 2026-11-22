@@ -56,6 +56,19 @@ services:
       - mlflow
     restart: unless-stopped
 
+  ui:
+    build: ./ui
+    container_name: llmops-ui
+    ports:
+      - "127.0.0.1:${UI_PORT:-8502}:8501"
+    volumes:
+      - ./ui:/ui
+    environment:
+      API_URL: http://api:8000
+    depends_on:
+      - api
+    restart: unless-stopped
+
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus

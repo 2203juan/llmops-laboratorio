@@ -3,11 +3,59 @@
 Asistente RAG local para consultar las políticas de TecnoFábrica, una empresa ficticia.
 Los modelos corren en Ollama, sin llamar a ningún proveedor externo: `qwen2.5:1.5b`
 responde y `nomic-embed-text` genera los embeddings. Cada consulta queda trazada en
-MLflow, y Prometheus y Grafana muestran sus tokens, latencia y similitud. Son cinco
-contenedores en Docker Compose.
+MLflow, y Prometheus y Grafana muestran sus tokens, latencia y similitud. Son seis
+contenedores en Docker Compose, contando un chat en Streamlit.
 
 Basado en el tutorial de Juan Manuel Núñez Velasco en Medium. El tutorial está escrito
 para Windows con WSL2; este proyecto corre en macOS con Docker Desktop.
+
+## Evidencias
+
+### Chat en Streamlit
+
+La respuesta sale de la política de seguridad, que es la primera fuente recuperada
+(similitud 0.574). Debajo aparecen los tokens y los tiempos de la consulta.
+
+![Chat en Streamlit](docs/img/streamlit.png)
+
+### API
+
+Los cinco endpoints en Swagger. `/indexar` corre el pipeline y `/preguntar` responde con el RAG.
+
+![Swagger de la API](docs/img/swagger.png)
+
+Una consulta a `/preguntar` con su respuesta (código 200), los tokens, los tiempos y las
+fuentes. La primera fuente es la política de mantenimiento (similitud 0.603).
+
+![Consulta a /preguntar en Swagger](docs/img/swagger_preguntar.png)
+
+### Trazas en MLflow
+
+Cada consulta queda registrada en el experimento `Laboratorio_RAG_Ollama` con su entrada y
+su salida. Las 78 trazas incluyen consultas posteriores a la evaluación de la sección
+[Resultados](#resultados).
+
+![Trazas en MLflow](docs/img/mlflow.png)
+
+Dentro de una traza, `pipeline_rag` (1,31 s) se reparte entre `recuperar_documentos`
+(0,16 s) y `generar_respuesta_llm` (1,15 s). Es la misma consulta de la captura del chat.
+
+![Detalle de una traza en MLflow](docs/img/mlflow_traza.png)
+
+### Prometheus
+
+El target `llmops_api` está en estado `UP`: Prometheus lee `/metrics` de la API.
+
+![Targets de Prometheus](docs/img/prometheus.png)
+
+### Grafana
+
+Los tres contadores muestran solo 2 consultas (930 tokens de entrada, 46 de salida) porque
+viven en la memoria de la API y vuelven a cero cuando se reinicia; MLflow sí conserva el
+historial. Las curvas de abajo son promedios de los últimos 5 minutos y el hueco corresponde
+a un periodo sin consultas.
+
+![Dashboard de Grafana](docs/img/grafana.png)
 
 ## Arquitectura
 
@@ -19,7 +67,7 @@ documentos/ ──► bronze ──► silver ──► gold ──► data/gold
                 copia      limpieza   fragmentos,     │
                 exacta                embeddings      │
                                                       ▼
-pregunta ──► API FastAPI ──► recuperar_documentos ──► similitud coseno
+Streamlit ─► API FastAPI ──► recuperar_documentos ──► similitud coseno
                  │                  │                 (embedding de la pregunta: nomic-embed-text)
                  │                  ▼
                  │           generar_respuesta_llm ──► Ollama: qwen2.5:1.5b
@@ -30,6 +78,7 @@ pregunta ──► API FastAPI ──► recuperar_documentos ──► similitu
 
 | Servicio | URL | Para qué |
 |---|---|---|
+| Chat (Streamlit) | http://localhost:8502 | Preguntar y ver la respuesta, los tokens y las fuentes |
 | API (Swagger) | http://localhost:8020/docs | `/indexar`, `/preguntar`, `/health`, `/metrics` |
 | MLflow | http://localhost:5001 | Trazas del experimento `Laboratorio_RAG_Ollama` |
 | Prometheus | http://localhost:9091 | Métricas y consultas PromQL |
@@ -55,6 +104,7 @@ documentos/                    políticas de TecnoFábrica (fuente)
 src/                           extract/, transform/, load/
 data/                          bronze/, silver/, gold/
 app/                           API FastAPI y cliente de terminal
+ui/                            chat en Streamlit
 evaluacion/                    preguntas, scripts y resultados publicados
 tests/                         extract, transform, calidad de datos y RAG
 logs/                          pipeline.log
@@ -71,7 +121,7 @@ de los scripts de evaluación.
 
 ```bash
 make all           # primera vez: levanta todo, descarga los modelos (~1,3 GB), corre el pipeline, pregunta y abre el navegador
-make up            # levanta los cinco servicios
+make up            # levanta los seis servicios
 make pipeline      # documentos/ -> bronze -> silver -> gold -> SQLite (al cambiar los documentos)
 make ask Q="¿Cuál es el inventario de seguridad?" K=3 T=0.2
 make eval          # 8 preguntas de referencia -> evaluacion/resultados/evaluacion.json
@@ -80,6 +130,9 @@ make status        # estado de cada servicio
 make down          # apaga todo; los modelos, trazas y métricas se conservan
 make help          # todos los comandos
 ```
+
+El chat queda en http://localhost:8502. Cada pregunta se responde por separado: el
+historial se ve en pantalla, pero no se envía al modelo.
 
 `make ask` muestra la respuesta, los tokens, los tiempos y las fuentes recuperadas:
 
@@ -181,6 +234,8 @@ embeddings simulados, así que no necesitan Ollama. El CI de GitHub Actions vali
 
 - **macOS en vez de Windows + WSL2.** Docker Desktop ya trae la VM Linux, así que los
   pasos 2 y 3 no aplican.
+- **Chat en Streamlit** (`ui/`), que consulta la API; el tutorial solo usa Swagger. Está en
+  el puerto 8502 porque el 8501 lo ocupa otro proyecto (`UI_PORT` en `.env`).
 - **Puertos 8020, 5001, 9091, 3001 y 11435** en vez de 8000, 5000, 9090, 3000 y 11434:
   en mi equipo estaban ocupados por otros proyectos, por AirPlay (5000) y por Ollama
   nativo (11434). Se cambian en `.env`; `--allowed-hosts` de MLflow usa el mismo puerto.

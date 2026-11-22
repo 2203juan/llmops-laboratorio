@@ -9,12 +9,14 @@ SHELL := /bin/bash
 # Puertos: .env (copiado de .env.example) los define
 -include .env
 API_PORT        ?= 8020
+UI_PORT         ?= 8502
 MLFLOW_PORT     ?= 5001
 PROMETHEUS_PORT ?= 9091
 GRAFANA_PORT    ?= 3001
 OLLAMA_PORT     ?= 11435
 
 API        := http://localhost:$(API_PORT)
+UI         := http://localhost:$(UI_PORT)
 MLFLOW     := http://localhost:$(MLFLOW_PORT)
 PROMETHEUS := http://localhost:$(PROMETHEUS_PORT)
 GRAFANA    := http://localhost:$(GRAFANA_PORT)
@@ -42,11 +44,12 @@ setup: ## Crea .env y el entorno local para los scripts de evaluación
 	@test -x $(PY) || { command -v uv >/dev/null || { echo "Instala uv: brew install uv"; exit 1; }; \
 		uv venv -q --python 3.11 .venv && uv pip install -q --python $(PY) requests && echo "  ✓ .venv listo"; }
 
-up: setup ## Construye y levanta los cinco servicios
-	@echo "→ Levantando ollama, mlflow, api, prometheus y grafana..."
+up: setup ## Construye y levanta los seis servicios
+	@echo "→ Levantando ollama, mlflow, api, ui, prometheus y grafana..."
 	@docker compose up -d --build --quiet-pull >/dev/null 2>&1 || { docker compose up -d --build; exit 1; }
 	@for i in $$(seq 1 90); do curl -sf -o /dev/null $(API)/health && break; \
 		[ $$i -eq 90 ] && { echo "  ✗ La API no respondió. Revisa: make logs"; exit 1; }; sleep 2; done
+	@for i in $$(seq 1 30); do curl -sf -o /dev/null $(UI)/_stcore/health && break; sleep 1; done
 	@$(MAKE) --no-print-directory status
 
 down: ## Apaga todo (conserva modelos, trazas y métricas)
@@ -59,6 +62,7 @@ status: ## Estado de cada servicio
 	@check() { if curl -sf -o /dev/null -m 3 "$$2"; then s="\033[32m● arriba\033[0m"; else s="\033[31m○ abajo \033[0m"; fi; printf "  %-11s $$s  %s\n" "$$1" "$$3"; }; \
 	check Ollama     http://localhost:$(OLLAMA_PORT)/api/version  "http://localhost:$(OLLAMA_PORT)"; \
 	check API        $(API)/health                    $(API)/docs; \
+	check Chat       $(UI)/_stcore/health             $(UI); \
 	check MLflow     $(MLFLOW)/health                 $(MLFLOW); \
 	check Prometheus $(PROMETHEUS)/-/ready            $(PROMETHEUS)/targets; \
 	check Grafana    $(GRAFANA)/api/health            "$(GRAFANA)  (admin/admin)"
@@ -95,8 +99,8 @@ test: ## Corre los tests del pipeline y del RAG dentro del contenedor de la API
 logs: ## Sigue los logs de la API
 	@docker compose logs -f --tail 50 api
 
-open: ## Abre Swagger, MLflow y el dashboard de Grafana
-	@open $(API)/docs $(MLFLOW) "$(GRAFANA)/d/llmops-ollama-rag"
+open: ## Abre el chat, Swagger, MLflow y el dashboard de Grafana
+	@open $(UI) $(API)/docs $(MLFLOW) "$(GRAFANA)/d/llmops-ollama-rag"
 
 clean: ## Apaga todo y BORRA los volúmenes (modelos descargados, trazas y métricas) y las salidas del pipeline
 	@docker compose down -v >/dev/null 2>&1

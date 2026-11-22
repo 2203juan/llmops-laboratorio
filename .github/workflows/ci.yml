@@ -27,7 +27,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Compilar código
-        run: python -m compileall -q app src evaluacion main.py
+        run: python -m compileall -q app src ui evaluacion main.py
 
       - name: Tests del pipeline y del RAG
         run: python -m pytest -q -p no:cacheprovider tests
