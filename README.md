@@ -1,10 +1,10 @@
 # Laboratorio LLMOps
 
 Asistente RAG local para consultar las políticas de TecnoFábrica, una empresa ficticia.
-Ollama ejecuta el LLM (`qwen2.5:1.5b`) y los embeddings (`nomic-embed-text`), FastAPI
-expone la API, MLflow guarda la traza de cada consulta, Prometheus recolecta tokens,
-latencia y similitud, y Grafana los muestra en un dashboard. Todo corre en cinco
-contenedores con Docker Compose, sin llamar a ningún proveedor externo.
+Los modelos corren en Ollama, sin llamar a ningún proveedor externo: `qwen2.5:1.5b`
+responde y `nomic-embed-text` genera los embeddings. Cada consulta queda trazada en
+MLflow, y Prometheus y Grafana muestran sus tokens, latencia y similitud. Son cinco
+contenedores en Docker Compose.
 
 Basado en el tutorial de Juan Manuel Núñez Velasco en Medium. El tutorial está escrito
 para Windows con WSL2; este proyecto corre en macOS con Docker Desktop.
@@ -93,7 +93,8 @@ Pregunta: *¿Qué debe hacer un operario si encuentra una condición insegura?*
 Con K = 1 la respuesta es igual de correcta y usa menos de la mitad de los tokens de
 entrada. K = 3 y K = 5 dan lo mismo porque el índice solo tiene **3 fragmentos**: cada
 documento mide menos de 500 caracteres, el tamaño de fragmento, así que no se divide.
-Con estos documentos, más contexto no mejora la respuesta; solo la encarece.
+Con estos documentos, pasar de K = 1 a K = 3 duplica los tokens de entrada (220 → 472)
+sin cambiar la respuesta.
 
 ### Experimento B: temperatura
 
@@ -104,8 +105,8 @@ Pregunta: *¿Cada cuánto se realiza mantenimiento preventivo?*, 3 repeticiones 
 - **T = 1**: tres redacciones distintas; una se acorta a "Se realiza mantenimiento
   preventivo cada 30 días." (13 tokens frente a 21).
 
-Las 9 respuestas dicen "cada 30 días". La temperatura cambió la redacción y la longitud,
-no el dato.
+Las 9 respuestas dicen "cada 30 días"; con la temperatura variaron la redacción y la
+longitud, de 13 a 22 tokens de salida.
 
 ### Experimento C: preguntas sin evidencia
 
@@ -116,8 +117,9 @@ no el dato.
 | ¿Cuántos empleados tiene TecnoFábrica? | 0.663 | No existe información en el contexto proporcionado sobre el número de empleados… |
 
 El modelo no inventó ningún dato. Aun así, la pregunta de empleados obtuvo una similitud
-de 0.663, casi igual que una pregunta con respuesta (0.654 en el experimento A): la
-similitud vectorial sola no distingue si los documentos contienen la respuesta.
+de 0.663, casi igual que una pregunta con respuesta (0.654 en el experimento A): en
+este índice, la similitud por sí sola no habría servido para detectar que faltaba la
+respuesta.
 
 ### Trazas y métricas
 
