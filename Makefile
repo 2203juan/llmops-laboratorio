@@ -1,6 +1,6 @@
 # =====================================================================
 # Laboratorio LLMOps - automatización
-#   Primera vez:  make all     (levanta, descarga modelos, indexa y prueba)
+#   Primera vez:  make all     (levanta, descarga modelos, corre el pipeline y prueba)
 #   Día a día:    make up  /  make ask  /  make down  /  make status
 # =====================================================================
 
@@ -27,14 +27,14 @@ K ?= 3
 T ?= 0.2
 
 .DEFAULT_GOAL := help
-.PHONY: help all setup up down restart status models index ask eval experimentos test logs open clean
+.PHONY: help all setup up down restart status models pipeline index ask eval experimentos test logs open clean
 
 help: ## Muestra esta ayuda
 	@echo "Uso: make <comando>"
 	@echo
 	@grep -E '^[a-zA-Z_-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*## "}{printf "  \033[36m%-13s\033[0m %s\n", $$1, $$2}'
 
-all: up models index ask open ## Primera vez: levanta todo, descarga modelos, indexa, pregunta y abre el navegador
+all: up models pipeline ask open ## Primera vez: levanta todo, descarga modelos, corre el pipeline, pregunta y abre el navegador
 
 setup: ## Crea .env y el entorno local para los scripts de evaluación
 	@docker info >/dev/null 2>&1 || { echo "  ✗ Docker no está corriendo. Abre Docker Desktop."; exit 1; }
@@ -71,21 +71,25 @@ models: ## Descarga qwen2.5:1.5b y nomic-embed-text en Ollama (solo la primera v
 			|| { echo "→ Descargando $$m..."; docker compose exec -T ollama ollama pull $$m >/dev/null 2>&1 && echo "  ✓ $$m"; }; \
 	done
 
-index: setup ## Indexa los documentos de documentos/
+pipeline: ## Indexa: documentos -> bronze -> silver -> gold -> índice SQLite
+	@echo "→ Pipeline de indexación..."
+	@docker compose exec -T api python main.py 2>&1
+
+index: setup ## Corre el mismo pipeline a través de la API (POST /indexar)
 	@echo "→ Indexando documentos..."
 	@API_URL=$(API) $(PY) app/cliente.py indexar
 
 ask: setup ## Hace una pregunta al RAG.  Ej: make ask Q="¿Cuál es el inventario de seguridad?" K=3 T=0.2
 	@API_URL=$(API) $(PY) app/cliente.py preguntar "$(Q)" $(K) $(T) \
-		|| echo "  ✗ Falló la consulta. ¿Corriste make models y make index?"
+		|| echo "  ✗ Falló la consulta. ¿Corriste make models y make pipeline?"
 
-eval: setup ## Corre las 8 preguntas de referencia y guarda datos/resultados.json
-	@API_URL=$(API) $(PY) app/evaluacion.py
+eval: setup ## Corre las 8 preguntas de referencia y guarda evaluacion/resultados/evaluacion.json
+	@API_URL=$(API) $(PY) evaluacion/evaluacion.py
 
 experimentos: setup ## Experimentos A, B y C: top_k, temperatura y preguntas sin evidencia
-	@for e in topk temperatura sin_evidencia; do echo "→ Experimento $$e"; API_URL=$(API) $(PY) app/experimentos.py $$e || exit 1; done
+	@for e in topk temperatura sin_evidencia; do echo "→ Experimento $$e"; API_URL=$(API) $(PY) evaluacion/experimentos.py $$e || exit 1; done
 
-test: ## Corre los tests del RAG dentro del contenedor de la API
+test: ## Corre los tests del pipeline y del RAG dentro del contenedor de la API
 	@docker compose exec -T api python -m pytest -q -p no:cacheprovider tests
 
 logs: ## Sigue los logs de la API
@@ -94,7 +98,7 @@ logs: ## Sigue los logs de la API
 open: ## Abre Swagger, MLflow y el dashboard de Grafana
 	@open $(API)/docs $(MLFLOW) "$(GRAFANA)/d/llmops-ollama-rag"
 
-clean: ## Apaga todo y BORRA los volúmenes (modelos descargados, trazas y métricas)
+clean: ## Apaga todo y BORRA los volúmenes (modelos descargados, trazas y métricas) y las salidas del pipeline
 	@docker compose down -v >/dev/null 2>&1
-	@rm -f ./datos/indice.json
-	@echo "✓ Volúmenes borrados. 'make all' vuelve a descargar los modelos."
+	@rm -f ./data/bronze/*.txt ./data/bronze/*.csv ./data/silver/*.csv ./data/gold/*.csv ./data/gold/*.json ./data/gold/*.db ./logs/pipeline.log
+	@echo "✓ Volúmenes y capas borrados (se conserva la evidencia de evaluacion/resultados/). 'make all' vuelve a descargar los modelos."

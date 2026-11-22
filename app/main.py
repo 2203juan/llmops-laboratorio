@@ -9,8 +9,8 @@ from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 
-from rag import indexar_documentos, recuperar_documentos
-from metricas import (
+from app.rag import recuperar_documentos
+from app.metricas import (
     CONSULTAS,
     TOKENS_ENTRADA,
     TOKENS_SALIDA,
@@ -18,6 +18,7 @@ from metricas import (
     DURACION_RAG,
     SIMILITUD_RAG
 )
+from main import ejecutar_pipeline
 
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
 MLFLOW_URL = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
@@ -69,7 +70,7 @@ def health():
 @app.post("/indexar")
 def indexar():
     try:
-        return indexar_documentos()
+        return ejecutar_pipeline()
     except Exception as error:
         raise HTTPException(status_code=500, detail=str(error))
 

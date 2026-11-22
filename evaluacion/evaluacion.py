@@ -8,7 +8,7 @@ import requests
 
 # El tutorial usa el puerto 8000; aquí es configurable (por defecto 8020)
 API_URL = os.getenv("API_URL", "http://localhost:8020") + "/preguntar"
-RUTA_PREGUNTAS = Path("datos/preguntas_evaluacion.csv")
+RUTA_PREGUNTAS = Path("evaluacion/preguntas.csv")
 
 resultados = []
 with RUTA_PREGUNTAS.open(encoding="utf-8", newline="") as archivo:
@@ -39,7 +39,7 @@ with RUTA_PREGUNTAS.open(encoding="utf-8", newline="") as archivo:
         except requests.RequestException as error:
             print(f"Error en pregunta {fila['id']}: {error}")
 
-Path("datos/resultados.json").write_text(
+Path("evaluacion/resultados/evaluacion.json").write_text(
     json.dumps(resultados, ensure_ascii=False, indent=2),
     encoding="utf-8"
 )

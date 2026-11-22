@@ -1,0 +1,18 @@
+# Parámetros del pipeline. Las rutas son relativas a la raíz del proyecto.
+rutas:
+  fuente: documentos
+  bronze: data/bronze
+  silver: data/silver
+  gold: data/gold
+  indice: data/gold/indice.db
+  log: logs/pipeline.log
+
+patron_documentos: "*.txt"
+
+fragmentos:
+  tamano: 500
+  solape: 80
+
+embedding:
+  modelo: nomic-embed-text
+  timeout: 180

@@ -1,10 +1,10 @@
 """Experimentos A, B y C del tutorial: top_k, temperatura y preguntas sin evidencia.
 
 Uso (desde la raíz del proyecto):
-    python app/experimentos.py topk
-    python app/experimentos.py temperatura
-    python app/experimentos.py sin_evidencia
-Guarda los resultados en datos/experimento_<nombre>.json.
+    python evaluacion/experimentos.py topk
+    python evaluacion/experimentos.py temperatura
+    python evaluacion/experimentos.py sin_evidencia
+Guarda los resultados en evaluacion/resultados/experimento_<nombre>.json.
 """
 
 import json
@@ -70,9 +70,9 @@ EXPERIMENTOS = {
 if __name__ == "__main__":
     nombre = sys.argv[1] if len(sys.argv) > 1 else ""
     if nombre not in EXPERIMENTOS:
-        sys.exit(f"Uso: python app/experimentos.py {{{'|'.join(EXPERIMENTOS)}}}")
+        sys.exit(f"Uso: python evaluacion/experimentos.py {{{'|'.join(EXPERIMENTOS)}}}")
     resultados = EXPERIMENTOS[nombre]()
-    salida = Path(f"datos/experimento_{nombre}.json")
+    salida = Path(f"evaluacion/resultados/experimento_{nombre}.json")
     salida.write_text(json.dumps(resultados, ensure_ascii=False, indent=2), encoding="utf-8")
     for r in resultados:
         print(f"k={r['top_k']} t={r['temperatura']} | in={r['tokens_entrada']} out={r['tokens_salida']} "

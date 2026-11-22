@@ -11,9 +11,16 @@ para Windows con WSL2; este proyecto corre en macOS con Docker Desktop.
 
 ## Arquitectura
 
+Los documentos pasan por un pipeline medallion (bronze, silver, gold) que termina en una
+base SQLite. La API busca en esa base los fragmentos para responder:
+
 ```
-pregunta ──► API FastAPI ──► recuperar_documentos ──► embedding (Ollama: nomic-embed-text)
-                 │                  │                   similitud coseno contra datos/indice.json
+documentos/ ──► bronze ──► silver ──► gold ──► data/gold/indice.db
+                copia      limpieza   fragmentos,     │
+                exacta                embeddings      │
+                                                      ▼
+pregunta ──► API FastAPI ──► recuperar_documentos ──► similitud coseno
+                 │                  │                 (embedding de la pregunta: nomic-embed-text)
                  │                  ▼
                  │           generar_respuesta_llm ──► Ollama: qwen2.5:1.5b
                  │
@@ -29,17 +36,46 @@ pregunta ──► API FastAPI ──► recuperar_documentos ──► embeddin
 | Grafana | http://localhost:3001 | Dashboard *Monitoreo LLMOps: Ollama y RAG* (admin / admin) |
 | Ollama | http://localhost:11435 | Modelos locales |
 
+### Capas
+
+| Etapa | Código | Qué hace | Salida |
+|---|---|---|---|
+| Extract → bronze | `src/extract/extract_documentos.py` | Copia los TXT byte a byte y registra tamaño, SHA-256 y fecha | `data/bronze/*.txt`, `manifiesto.csv` |
+| Transform → silver | `src/transform/clean_documentos.py` | Normaliza Unicode, saltos de línea y espacios; descarta documentos vacíos o repetidos | `data/silver/documentos.csv` |
+| Transform → gold | `src/transform/fragmentar.py` | Divide en fragmentos de 500 caracteres con solape de 80 | `data/gold/fragmentos.csv` |
+| Transform → gold | `src/transform/embeddings.py` | Calcula el embedding de cada fragmento con Ollama | `data/gold/embeddings.json` |
+| Load | `src/load/load_indice.py` | Carga documentos y fragmentos en SQLite; si algo falla, queda el índice anterior | `data/gold/indice.db` |
+
+### Estructura
+
+```
+main.py                        pipeline completo: extract → transform → load
+config/config.yaml             rutas, tamaño de fragmento y modelo de embeddings
+documentos/                    políticas de TecnoFábrica (fuente)
+src/                           extract/, transform/, load/
+data/                          bronze/, silver/, gold/
+app/                           API FastAPI y cliente de terminal
+evaluacion/                    preguntas, scripts y resultados publicados
+tests/                         extract, transform, calidad de datos y RAG
+logs/                          pipeline.log
+mlflow/ prometheus/ grafana/   servicios de observabilidad
+```
+
+La evaluación va aparte del pipeline: las preguntas de referencia no son base de
+conocimiento y no deben entrar al índice.
+
 ## Uso
 
 Requiere Docker Desktop abierto y [uv](https://github.com/astral-sh/uv) para el entorno
 de los scripts de evaluación.
 
 ```bash
-make all           # primera vez: levanta todo, descarga los modelos (~1,3 GB), indexa, pregunta y abre el navegador
+make all           # primera vez: levanta todo, descarga los modelos (~1,3 GB), corre el pipeline, pregunta y abre el navegador
 make up            # levanta los cinco servicios
+make pipeline      # documentos/ -> bronze -> silver -> gold -> SQLite (al cambiar los documentos)
 make ask Q="¿Cuál es el inventario de seguridad?" K=3 T=0.2
-make eval          # 8 preguntas de referencia -> datos/resultados.json
-make experimentos  # top_k, temperatura y preguntas sin evidencia -> datos/experimento_*.json
+make eval          # 8 preguntas de referencia -> evaluacion/resultados/evaluacion.json
+make experimentos  # top_k, temperatura y preguntas sin evidencia -> evaluacion/resultados/experimento_*.json
 make status        # estado de cada servicio
 make down          # apaga todo; los modelos, trazas y métricas se conservan
 make help          # todos los comandos
@@ -59,7 +95,7 @@ make help          # todos los comandos
 
 ## Resultados
 
-Todos los datos de esta sección salen de `datos/resultados.json` y `datos/experimento_*.json`.
+Todos los datos de esta sección salen de `evaluacion/resultados/`.
 Ollama corre en CPU dentro de Docker (`ollama ps` muestra `100% CPU`); con el modelo ya
 cargado, cada respuesta tarda menos de un segundo.
 
@@ -136,8 +172,10 @@ cargándose en memoria.
 make test
 ```
 
-Prueban la división en fragmentos con solapamiento y la similitud coseno. El CI de
-GitHub Actions valida el `docker-compose.yml` y corre los mismos tests.
+Los 18 tests cubren la copia a bronze, la limpieza, la división en fragmentos, la calidad
+de cada capa (nulos, duplicados, tamaños), la carga del índice y la similitud coseno. Usan
+embeddings simulados, así que no necesitan Ollama. El CI de GitHub Actions valida el
+`docker-compose.yml` y corre los mismos tests.
 
 ## Cambios respecto al tutorial
 
@@ -146,10 +184,14 @@ GitHub Actions valida el `docker-compose.yml` y corre los mismos tests.
 - **Puertos 8020, 5001, 9091, 3001 y 11435** en vez de 8000, 5000, 9090, 3000 y 11434:
   en mi equipo estaban ocupados por otros proyectos, por AirPlay (5000) y por Ollama
   nativo (11434). Se cambian en `.env`; `--allowed-hosts` de MLflow usa el mismo puerto.
+- **Pipeline medallion.** El tutorial lee los TXT y escribe `datos/indice.json` en una sola
+  función; aquí son etapas separadas y la API consulta SQLite. El cambio no altera los
+  resultados: los 3 fragmentos y sus embeddings son idénticos a los del índice anterior.
 - **Dashboard de Grafana precargado** con los seis paneles del paso 27, en
   `grafana/provisioning/dashboards/`.
-- **`app/experimentos.py`** ejecuta los experimentos A, B y C del paso 30 y guarda los
+- **`evaluacion/experimentos.py`** ejecuta los experimentos A, B y C del paso 30 y guarda los
   resultados, en lugar de llenar las tablas a mano.
 - **`app/cliente.py`** formatea las respuestas en la terminal para `make index` y `make ask`.
-- **`app/evaluacion.py`** lee la URL de la API de la variable `API_URL`.
-- **`pytest`** agregado a `app/requirements.txt` para correr los tests dentro del contenedor.
+- **`evaluacion/evaluacion.py`** lee la URL de la API de la variable `API_URL`.
+- **`pytest`** agregado a `requirements.txt` para correr los tests dentro del contenedor, junto con
+  `pandas` y `pyyaml` para el pipeline.
